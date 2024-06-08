@@ -1,0 +1,97 @@
+name: build and test workflow
+
+on:
+  pull_request:
+    types: [opened, synchronize, labeled, unlabeled]
+  push:
+    branches: 
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository 
+        uses: actions/checkout@v3
+      
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Cache .NET packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+      
+      - name: Restore dependencies
+        run: dotnet restore PublicProgram/PublicProgram.sln
+
+      - name: Build
+        run: dotnet build PublicProgram/PublicProgram.sln --no-restore
+
+  unit-tests:
+    needs: [build]
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'unit-tests') || github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Cache .NET packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: dotnet restore PublicProgram/PublicProgram.sln
+
+      - name: Build
+        run: dotnet build PublicProgram/PublicProgram.sln --no-restore
+
+      - name: Run unit tests
+        run: dotnet test PublicProgram/PublicProgram.UnitTests/PublicProgram.UnitTests.csproj --no-build
+
+  integration-tests:
+    needs: [build]
+    if: ${{ contains(github.event.pull_request.labels.*.name, 'integration-tests') || github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup .NET Core
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Cache .NET packages
+        uses: actions/cache@v3
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/*.csproj') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: dotnet restore PublicProgram/PublicProgram.sln
+
+      - name: Build
+        run: dotnet build PublicProgram/PublicProgram.sln --no-restore
+
+      - name: Run integration tests
+        run: dotnet test PublicProgram/PublicProgram.IntegrationTests/PublicProgram.IntegrationTests.csproj --no-build
