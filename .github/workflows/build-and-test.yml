@@ -60,7 +60,7 @@ jobs:
         run: dotnet restore PublicProgram/PublicProgram.sln
 
       - name: Build
-        run: dotnet build Auth.API/Auth.API.sln --no-restore
+        run: dotnet build PublicProgram/PublicProgram.sln --no-restore
 
       - name: Run unit tests
         run: dotnet test PublicProgram/PublicProgram.UnitTests/PublicProgram.UnitTests.csproj --no-build
@@ -91,7 +91,7 @@ jobs:
         run: dotnet restore PublicProgram/PublicProgram.sln
 
       - name: Build
-        run: dotnet build Auth.API/Auth.API.sln --no-restore
+        run: dotnet build PublicProgram/PublicProgram.sln --no-restore
 
       - name: Run integration tests
         run: dotnet test PublicProgram/PublicProgram.IntegrationTests/PublicProgram.IntegrationTests.csproj --no-build
